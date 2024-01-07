@@ -32,9 +32,17 @@
 
         <!-- Docker -->
         <docker.jib-maven-plugin.version>3.4.0</docker.jib-maven-plugin.version>
+        <docker.image.base>eclipse-temurin:17-jre-jammy</docker.image.base>
+        <docker.image.architecture>amd64</docker.image.architecture>
+        <docker.image.os>linux</docker.image.os>
         <docker.image.prefix>wishnu21</docker.image.prefix>
+        <docker.image.name>petclinic-rest</docker.image.name>
+        <docker.image.tag>latest</docker.image.tag>
+        <docker.image.port>9966</docker.image.port>
         <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
     </properties>
+
+
 
     <dependencies>
         <dependency>
@@ -160,6 +168,8 @@
         </dependency>
     </dependencies>
 
+
+
     <build>
         <plugins>
             <plugin>
@@ -240,13 +250,28 @@
                 <artifactId>jib-maven-plugin</artifactId>
                 <version>${docker.jib-maven-plugin.version}</version>
                 <configuration>
-                    <to>
+                   <!-- <to>
                         <image>docker.io/${docker.image.prefix}/${project.artifactId}</image>
                         <tags>
                             <tag>${project.version}</tag>
                             <tag>latest</tag>
                         </tags>
-                    </to>
+                    </to>-->
+                    <from>
+                        <platforms>
+                            <platform>
+                                <architecture>${docker.image.architecture}</architecture>
+                                <os>${docker.image.os}</os>
+                            </platform>
+                        </platforms>
+                        <image>${docker.image.base}</image>
+                    </from>
+                    <container>
+                        <ports>
+                            <port>${docker.image.port}</port>
+                        </ports>
+                        <format>OCI</format>
+                    </container>
                 </configuration>
             </plugin>
 
@@ -339,5 +364,70 @@
                 </configuration>
             </plugin>
         </plugins>
+
+
     </build>
+
+    <profiles>
+        <profile>
+            <id>push-image-locally</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.google.cloud.tools</groupId>
+                        <artifactId>jib-maven-plugin</artifactId>
+                        <version>${docker.jib-maven-plugin.version}</version>
+                        <configuration>
+                            <from>
+                                <platforms>
+                                    <platform>
+                                        <architecture>${docker.image.architecture}</architecture>
+                                        <os>${docker.image.os}</os>
+                                    </platform>
+                                </platforms>
+                                <image>${docker.image.base}</image>
+                            </from>
+                            <container>
+                                <ports>
+                                    <port>${docker.image.port}</port>
+                                </ports>
+                                <format>OCI</format>
+                            </container>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>push-custom-tag</id>
+                                <phase>package</phase>
+                                <configuration>
+                                    <to>
+                                        <image>${docker.image.prefix}/${docker.image.name}:${docker.image.tag}</image>
+                                    </to>
+                                </configuration>
+                                <goals>
+                                    <goal>dockerBuild</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>push-latest-tag</id>
+                                <phase>package</phase>
+                                <configuration>
+                                    <to>
+                                        <image>${docker.image.prefix}/${docker.image.name}:${docker.image.tag}</image>
+                                    </to>
+                                </configuration>
+                                <goals>
+                                    <goal>dockerBuild</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
+
 </project>
