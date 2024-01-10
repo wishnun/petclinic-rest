@@ -270,6 +270,9 @@
                         <ports>
                             <port>${docker.image.port}</port>
                         </ports>
+                        <labels>
+                            <name>petclinic-rest</name>
+                        </labels>
                         <format>OCI</format>
                     </container>
                 </configuration>
@@ -392,7 +395,7 @@
                             </from>
                             <container>
                                 <ports>
-                                    <port>${docker.image.port}</port>
+                                        <port>${docker.image.port}</port>
                                 </ports>
                                 <format>OCI</format>
                             </container>
